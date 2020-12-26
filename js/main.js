@@ -1,16 +1,37 @@
 var service = new TaskService();
+var isLoading = false;
+var isDeleted = false;
+var isAdded = false;
 
 showListTask();
+
+function checkLoading(){
+  if(isLoading)
+    getElement("loading").style.display = "block";
+  else
+    getElement("loading").style.display ="none";
+}
+
+function alert(){
+  if(isAdded)
+    alert("Add Successfully");
+  else if(isDeleted)
+    alert("Delete Succesfully");
+}
 
 function getElement(input) {
   return document.getElementById(input);
 }
 
 function showListTask() {
+  isLoading = true;
+  checkLoading();
   service
     .getListTaskApi()
     .then((res) => {
-      createToDoList(res.data);
+        isLoading = false;
+        checkLoading();
+       createToDoList(res.data);
     })
     .catch((err) => {
       console.log(err);
@@ -22,7 +43,6 @@ function updateTask(task) {
     .updateTaskApi(task)
     .then((result) => {
       showListTask();
-      console.log(result);
     })
     .catch((err) => {
       console.log(err);
@@ -33,7 +53,6 @@ getElement("addItem").addEventListener("click", () => {
   var taskName = getElement("newTask").value;
   var id = Math.floor(Math.random() * 100);
   var status = "todo";
-
   var task = new Task(id, taskName, status);
 
   service
@@ -76,8 +95,11 @@ function deleteButton(id) {
   service
     .deleteTaskApi(id)
     .then((res) => {
-      alert("Delete sucessfully");
-      showListTask();
+      showListTask() .then((result) => {
+        alert("Delete successfully");
+      }).catch((err) => {
+        console.log(err);
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -89,6 +111,7 @@ function updateButton(id) {
     .getTaskByIdAPI(id)
     .then((result) => {
       result.data.status = "todo" === result.data.status ? "completed" : "todo";
+      updateTask(result.data);
     })
     .catch((err) => {
       console.log(err);

@@ -24,7 +24,7 @@ function TaskService() {
   this.updateTaskApi = function (task) {
     return axios({
       url: `https://5fd46f3be9cda40016f5bf0a.mockapi.io/api/Task/${task.id}`,
-      method: "POST",
+      method: "PUT",
       data: task,
     });
   };
