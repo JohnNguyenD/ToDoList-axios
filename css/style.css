@@ -231,7 +231,28 @@ ul.todo li {
   padding: 0 10px;
   word-break: break-word;
 }
+.todo li p {
+  flex: 1;
+}
 
+#deleteButton,
+#checkButton {
+  background: white;
+  border: none;
+  font-size: 15px;
+}
+
+#deleteButton {
+  margin-right: 10px;
+}
+
+#deleteButton:hover i {
+  color: red;
+}
+
+#checkButton:hover {
+  color: green;
+}
 ul.todo#todo {
   padding-top: 30px;
 }

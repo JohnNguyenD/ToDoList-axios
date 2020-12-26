@@ -1,97 +1,96 @@
-var taskList = new TaskList();
-var validation = new Validation();
+var service = new TaskService();
 
-getLocalStorage();
-/**
- * Add Task
- */
-getEle("addItem").addEventListener("click", function () {
-  var newTask = getEle("newTask").value;
+showListTask();
 
-  var isValid = true;
-  isValid &= validation.checkEmty(
-    newTask,
-    "notiInput",
-    "(*) Vui lòng nhập thông tin"
-  );
+function getElement(input) {
+  return document.getElementById(input);
+}
 
-  if (!isValid) return;
+function showListTask() {
+  service
+    .getListTaskApi()
+    .then((res) => {
+      createToDoList(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 
-  var id = Math.random();
-  var task = new Task(id, newTask, "todo");
-  taskList.addTask(task);
-  createTable(taskList.arr);
-  setLocalStorage();
+function updateTask(task) {
+  service
+    .updateTaskApi(task)
+    .then((result) => {
+      showListTask();
+      console.log(result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+
+getElement("addItem").addEventListener("click", () => {
+  var taskName = getElement("newTask").value;
+  var id = Math.floor(Math.random() * 100);
+  var status = "todo";
+
+  var task = new Task(id, taskName, status);
+
+  service
+    .addTaskApi(task)
+    .then((res) => {
+      alert("Add successfully");
+      showListTask();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
-/**
- * Delete Task
- */
-function deleteTask(id) {
-  taskList.deleteTask(id);
-  createTable(taskList.arr);
-  setLocalStorage();
-}
-
-/**
- * Change Status
- */
-function changeStatus(id) {
-  var task = taskList.getTaskById(id);
-  task.status = task.status === "todo" ? "completed" : "todo";
-  taskList.updateTask(task);
-  createTable(taskList.arr);
-  setLocalStorage();
-}
-
-function createTable(arr) {
-  var contentTodo = "";
-  var contentCompleted = "";
-  getEle("todo").innerHTML = "";
-  getEle("completed").innerHTML = "";
-  arr.forEach(function (item, index) {
+function createToDoList(arr) {
+  var todoContent = "";
+  var completedContent = "";
+  arr.map((item) => {
     if (item.status === "todo") {
-      contentTodo += renderListLiHtml(item);
-      getEle("todo").innerHTML = contentTodo;
-    } else if (item.status === "completed") {
-      contentCompleted += renderListLiHtml(item);
-      getEle("completed").innerHTML = contentCompleted;
+      todoContent += `
+          <li><p>${item.taskName}</p>
+              <button id="deleteButton" onclick="deleteButton('${item.id}')"><i class="fa fa-trash"></i></button>
+              <button id="checkButton" onclick="updateButton('${item.id}')"><i class="fa fa-check"></i></button>
+          </li>
+      `;
+    } else {
+      completedContent += `
+          <li><p style="color:#25b99a">${item.taskName}</p>
+              <button id="deleteButton" onclick="deleteButton('${item.id}')"><i class="fa fa-trash"></i></button>
+              <button id="checkButton" onclick="updateButton('${item.id}')" style="color:#25b99a"><i class="fa fa-check"></i></button>
+          </li>
+      `;
     }
   });
+
+  getElement("todo").innerHTML = todoContent;
+  getElement("completed").innerHTML = completedContent;
 }
 
-function renderListLiHtml(item) {
-  return `<li>
-      <span>${item.taskName}</span>
-      <div class="buttons">
-        <button
-          class="remove"
-          onclick="deleteTask(${item.id})"
-        >
-          <i class="fa fa-trash-alt"></i>
-        </button>
-        <button
-          class="complete"
-          onclick="changeStatus(${item.id})"
-        >
-          <i class="far fa-check-circle"></i>
-          <i class="fas fa-check-circle"></i>
-        </button>
-      </div>
-    </li>`;
+function deleteButton(id) {
+  service
+    .deleteTaskApi(id)
+    .then((res) => {
+      alert("Delete sucessfully");
+      showListTask();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
-function setLocalStorage() {
-  localStorage.setItem("TaskList", JSON.stringify(taskList.arr));
-}
-
-function getLocalStorage() {
-  if (localStorage.getItem("TaskList")) {
-    taskList.arr = JSON.parse(localStorage.getItem("TaskList"));
-    createTable(taskList.arr);
-  }
-}
-
-function getEle(id) {
-  return document.getElementById(id);
+function updateButton(id) {
+  service
+    .getTaskByIdAPI(id)
+    .then((result) => {
+      result.data.status = "todo" === result.data.status ? "completed" : "todo";
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
