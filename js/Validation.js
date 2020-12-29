@@ -1,26 +1,34 @@
+var service = new TaskService();
+
 function Validation() {
   this.checkEmpty = function (input, spanId, message) {
     if (input === "") {
       getElement(spanId).style.display = "block";
       getElement(spanId).innerHTML = message;
-      return false;
+      return true;
     } else {
       getElement(spanId).style.display = "none";
       getElement(spanId).innerHTML = "";
-      return true;
+      return false;
     }
   };
 
-  this.checkDuplicateTask = function (tasks, input, spanId, message) {
+  this.checkDuplicateTask = function (input, spanId, message) {
     var isNotDuplicate = true;
-    for (const item in tasks) {
-      if (item.taskName === input) {
-        getElement(spanId).style.display = "block";
-        getElement(spanId).innerHTML = message;
-        isNotDuplicate = false;
-      }
-    }
-
+    service
+      .getListTaskApi()
+      .then((result) => {
+        result.data.map((item) => {
+          if (item.taskName === input) {
+            getElement(spanId).style.display = "block";
+            getElement(spanId).innerHTML = message;
+            isNotDuplicate = false;
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     if (isNotDuplicate) {
       getElement(spanId).style.display = "none";
       getElement(spanId).innerHTML = "";

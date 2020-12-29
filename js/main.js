@@ -1,7 +1,7 @@
 var service = new TaskService();
 var isLoading = false;
 var validate = new Validation();
-
+var arr = [];
 showListTask();
 
 function checkLoading() {
@@ -27,17 +27,18 @@ function showListTask() {
       console.log(err);
     });
 }
-showAllTasks();
-function showAllTasks() {
-  service
-    .getListTaskApi()
-    .then((result) => {
-      return result.data;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}
+
+// showAllTasks();
+// function showAllTasks() {
+//   service
+//     .getListTaskApi()
+//     .then((result) => {
+//       arr.push(result.data);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// }
 
 function updateTask(task) {
   service
@@ -55,23 +56,22 @@ getElement("addItem").addEventListener("click", () => {
   var id = Math.floor(Math.random() * 100);
   var status = "todo";
   var task = new Task(id, taskName, status);
-  var isEmpty = true;
-  var isDuplicated;
+  var isEmpty = false;
+  var isDuplicated = false;
 
   isEmpty = validate.checkEmpty(
     taskName,
-    "notiInput",
+    "error",
     "(*) Task can't leave blank"
   );
 
   isDuplicated = validate.checkDuplicateTask(
-    showAllTasks(),
     taskName,
     "notiInput",
     "(*) This task has already been existed"
   );
 
-  if (!isEmpty || !isDuplicated) return;
+  if (isEmpty || isDuplicated) return;
 
   service
     .addTaskApi(task)
@@ -114,13 +114,8 @@ function deleteButton(id) {
   service
     .deleteTaskApi(id)
     .then((res) => {
-      showListTask()
-        .then((result) => {
-          alert("Delete successfully");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      showListTask();
+      alert("Delete Successfully");
     })
     .catch((err) => {
       console.log(err);
